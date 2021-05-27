@@ -1,0 +1,66 @@
+---
+ 
+    - name: Download wiki
+
+      win_get_url:
+
+        url: https://github.com/Requarks/wiki/releases/download/2.5.201/wiki-js-windows.tar.gz
+
+        dest: C:\wiki-js-windows.tar.gz
+    - name: install 7zip
+      win_chocolatey:
+        name: 7zip
+        state: present
+    - name: unzip tar.gz
+
+      win_command: powershell.exe -
+      args:
+        stdin: 7z x "C:\wiki-js-windows.tar.gz" -o"C:\wiki-js-windows.tar" -y
+      become: True
+      become_method: runas
+      vars:
+        ansible_become_user: administrateur
+        ansible_become_pass: Mzayech.1986
+      
+    - name: unzip tar
+
+      win_command: powershell.exe -
+      args:
+        stdin: 7z x "C:\wiki-js-windows.tar" -o"C:\wiki-js-windows" -y
+      become: True
+      become_method: runas
+      vars:
+        ansible_become_user: administrateur
+        ansible_become_pass: Mzayech.1986
+        
+    - name: rename config.yml
+
+      win_command: powershell.exe -
+      args:
+        stdin: Rename-Item "C:\wiki-js-windows\config.sample.yml" "config.yml"
+      become: True
+      become_method: runas
+      vars:
+        ansible_become_user: administrateur
+        ansible_become_pass: Mzayech.1986
+    - name: Update port
+      win_lineinfile:
+        dest: 'C:\wiki-js-windows\config.yml'
+        regexp: 'port: 3000'
+        backrefs: yes
+        state : present
+        line: 'port: 80'
+    - name: Update user
+      win_lineinfile:
+        dest: 'C:\wiki-js-windows\config.yml'
+        regexp: 'user: wikijs'
+        backrefs: yes
+        state : present
+        line: 'user: postgres'
+    - name: Update password
+      win_lineinfile:
+        dest: 'C:\wiki-js-windows\config.yml'
+        regexp: 'pass: wikijsrocks'
+        backrefs: yes
+        state : present
+        line: 'pass: Mzayech@1986'

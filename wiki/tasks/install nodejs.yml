@@ -1,0 +1,22 @@
+---
+ 
+    - name: Download the nodejs installer
+
+      win_get_url:
+
+        url: https://nodejs.org/dist/v14.16.1/node-v14.16.1-x64.msi
+
+        dest: C:\node-v14.16.1-x64.msi
+
+
+    - name: Install nodejs
+
+      win_package:
+
+        path: C:\node-v14.16.1-x64.msi
+
+        state: present
+
+        arguments:
+
+          - /passive

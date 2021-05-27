@@ -1,0 +1,11 @@
+---
+- name: nodejs
+  import_tasks: install nodejs.yml
+- name: postresql
+  import_tasks: install Postgres.yml
+- name: wiki
+  import_tasks: download wiki and unzip.yml
+- name: srv
+  import_tasks: creation service nodejs.yml
+- name: bakup
+  import_tasks: backup and restart base.yml

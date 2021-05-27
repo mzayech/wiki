@@ -1,0 +1,78 @@
+---  
+ ###################### Create postgres user if don't exist ##############
+  - name: Ensure user postgres is present
+    win_user:
+      name: postgres
+      password: Mzayech@1986
+      state: present
+      groups:
+        - Administrators
+  - name: Create a profile for an account at C:\Users\postgres
+    win_user_profile:
+      username: postgres
+      name: postgres
+      state: present
+############# Install & configure PostgreSQL with postgres user previlege #########
+  - name:  install postgres
+    win_chocolatey:
+      name: postgresql13
+      package_params: '/Password:Mzayech@1986'
+      state: latest
+    become: True
+    become_method: runas
+    vars:
+      ansible_become_user: postgres
+      ansible_become_pass: "Mzayech@1986" 
+  - name: Add postgres to System path
+    win_path:
+      elements:
+       - 'C:\Program Files\PostgreSQL\13\bin'
+       - 'C:\Program Files\PostgreSQL\13\data'
+  - name: Create directory structure
+    win_file:
+     path: "%APPDATA%\\postgresql"
+     state: directory
+    become: True
+    become_method: runas
+    vars:
+      ansible_become_user: postgres
+      ansible_become_pass: "Mzayech@1986" 
+  - name: create gpass file
+    win_file:
+     path: "%APPDATA%\\postgresql\\pgpass.conf"
+     state: touch
+    become: True
+    become_method: runas
+    vars:
+      ansible_become_user: "postgres"
+      ansible_become_pass: "Mzayech@1986"
+  - name: create new gpass config file
+    win_lineinfile:
+      path: "%APPDATA%\\postgresql\\pgpass.conf"
+      line: 'localhost:*:*:postgres:Mzayech@1986'
+      state: present
+    become: True
+    become_method: runas
+    vars:
+      ansible_become_user: postgres
+      ansible_become_pass: "Mzayech@1986"
+  - name: Check if database wiki exist
+    win_command: powershell.exe -
+    args:
+      stdin: psql -d postgres -h localhost -p 5432 --username=postgres -tc "Select 1 from pg_database where datname='wiki';"
+    register: result
+    become: True
+    become_method: runas
+    vars:
+      ansible_become_user: postgres
+      ansible_become_pass: "Mzayech@1986"
+  - name: create database wiki if dosen't exist
+    win_command: powershell.exe -
+    args:
+      stdin: psql -d postgres -h localhost -p 5432 --username=postgres -tc "CREATE DATABASE wiki OWNER postgres;"
+    become: True
+    become_method: runas
+    vars:
+      ansible_become_user: postgres
+      ansible_become_pass: "Mzayech@1986"
+    when: result.stdout == "\r\n"

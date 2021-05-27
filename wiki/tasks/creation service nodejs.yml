@@ -1,0 +1,41 @@
+---  
+  - name: script service
+    win_file:
+     path: C:\wiki-js-windows\srv.cmd
+     state: touch
+    become: True
+    become_method: runas
+    vars:
+      ansible_become_user: "postgres"
+      ansible_become_pass: "Mzayech@1986"
+  - name: create config file
+    win_lineinfile:
+      path: C:\wiki-js-windows\srv.cmd
+      line: 'node server'
+      state: present
+    become: True
+    become_method: runas
+    vars:
+      ansible_become_user: postgres
+      ansible_become_pass: "Mzayech@1986"
+  - name: install win_nssm
+    win_chocolatey:
+     name: nssm
+  - name: service nodesrvwiki
+    win_command: powershell.exe -
+    args:
+      stdin:  nssm install nodesrvwiki "C:\wiki-js-windows\srv.cmd" Start SERVICE_AUTO_START
+    become: True
+    become_method: runas
+    vars:
+      ansible_become_user: administrateur
+      ansible_become_pass: Mzayech.1986
+  - name: run nodejswiki
+    win_service:
+     name: nodesrvwiki
+     state: started
+    become: True
+    become_method: runas
+    vars:
+      ansible_become_user: administrateur
+      ansible_become_pass: Mzayech.1986
